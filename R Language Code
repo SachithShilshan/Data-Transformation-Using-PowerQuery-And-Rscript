@@ -1,0 +1,54 @@
+# 'dataset' holds the input data for this script
+
+
+ds <- dataset
+
+# Original data
+first_column <-  ds[[3]]
+second_column <-  ds[[8]]
+th_column <-  ds[[10]]
+# Initialize empty vectors for the new data
+new_first_column <- c()
+new_second_column <- c()
+new_th_column <- c()
+
+# Loop through each element in the original data
+for (i in 1:length(first_column)) {
+
+  # Check if second_column[i] is not NA or NaN
+  if (!is.na(second_column[i]) && !is.nan(second_column[i])) {
+
+    # Split the original second column value into parts
+    parts <- integer(second_column[i] / 100)
+    remainder <- second_column[i] %% 100
+    mod <- (second_column[i] - remainder) / 100
+
+    # Check if parts is not NA and has non-zero length
+    if (!is.na(parts) && length(parts) > 0 && any(parts > 0)) {
+      for (j in 1:parts) {
+        new_first_column <- c(new_first_column, first_column[i])
+        new_second_column <- c(new_second_column, 100)
+        new_th_column <- c(new_th_column, th_column[i])
+      }
+    }
+    
+    # Append the remainder to the first column
+    if (remainder > 0) {
+      new_first_column <- c(new_first_column, first_column[i])
+      new_second_column <- c(new_second_column, remainder)
+      new_th_column <- c(new_th_column, th_column[i])
+      for (k in 1:mod) {
+        new_first_column <- c(new_first_column, first_column[i])
+        new_second_column <- c(new_second_column, 100)
+        new_th_column <- c(new_th_column, th_column[i])
+      }
+    }
+  } else {
+    # If second_column[i] is NA or NaN, skip this iteration
+    next
+  }
+}
+
+# Output the new table
+output_table <- data.frame(first_column = new_first_column, second_column = new_second_column,th_column = new_th_column)
+output_table
