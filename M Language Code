@@ -1,0 +1,18 @@
+let
+    Source = Folder.Files("C:\_____\___\RF\New folder"),
+    #"Filtered Hidden Files1" = Table.SelectRows(Source, each [Attributes]?[Hidden]? <> true),
+    #"Invoke Custom Function1" = Table.AddColumn(#"Filtered Hidden Files1", "Transform File", each #"Transform File"([Content])),
+    #"Renamed Columns1" = Table.RenameColumns(#"Invoke Custom Function1", {"Name", "Source.Name"}),
+    #"Removed Other Columns1" = Table.SelectColumns(#"Renamed Columns1", {"Source.Name", "Transform File"}),
+    #"Removed Errors" = Table.RemoveRowsWithErrors(#"Removed Other Columns1", {"Transform File"}),
+    #"Expanded Table Column1" = Table.ExpandTableColumn(#"Removed Errors", "Transform File", Table.ColumnNames(#"Transform File"(#"Sample File"))),
+    #"Split Column by Delimiter" = Table.SplitColumn(#"Expanded Table Column1", "Source.Name", Splitter.SplitTextByEachDelimiter({"."}, QuoteStyle.Csv, true), {"Source.Name.1", "Source.Name.2"}),
+    #"Split Column by Position" = Table.SplitColumn(#"Split Column by Delimiter", "Source.Name.1", Splitter.SplitTextByPositions({0, 10}, true), {"Source.Name.1.1", "Source.Name.1.2"}),
+    #"Changed Type1" = Table.TransformColumnTypes(#"Split Column by Position",{{"Source.Name.1.1", type text}, {"Source.Name.1.2", type date}}),
+    #"Split Column by Delimiter1" = Table.SplitColumn(#"Changed Type1", "Source.Name.1.1", Splitter.SplitTextByEachDelimiter({"as at"}, QuoteStyle.Csv, false), {"Source.Name.1.1.1", "Source.Name.1.1.2"}),
+    #"Changed Type" = Table.TransformColumnTypes(#"Split Column by Delimiter1",{{"Source.Name.1.1.1", type text}, {"Source.Name.1.1.2", type text}, {"Source.Name.2", type text}}),
+    #"Removed Columns" = Table.RemoveColumns(#"Changed Type",{"Source.Name.1.1.2", "Source.Name.2"}),
+    #"Renamed Columns" = Table.RenameColumns(#"Removed Columns",{{"Source.Name.1.1.1", "Source.Name"}, {"Source.Name.1.2", "Date"}}),
+    #"Changed Type2" = Table.TransformColumnTypes(#"Renamed Columns",{{"Planed Qty", Int64.Type}, {"Order qty.", Int64.Type}})
+in
+    #"Changed Type2"
